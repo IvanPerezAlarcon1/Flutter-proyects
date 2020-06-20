@@ -1,0 +1,47 @@
+name: appfitness
+description: A new Flutter project.
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^0.1.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - img/abdomen2.jpg
+    - img/abdominal.jpg
+    - img/abducion.jpg
+    - img/appfitness.png
+    - img/barra.jpg
+    - img/barra2.jpg
+    - img/cinta.jpg
+    - img/cinta2.jpg
+    - img/estiramiento.jpg
+    - img/gluteos.jpg
+    - img/gluteos2.jpg
+    - img/mancuernas.jpg
+    - img/otro.png
+    - img/otro1.png
+    - img/pesas.jpg
+  #ASÍ ES MÁS PRÁCTICO, LUEGO COLOCAMOS EL NOMBRE DE LA FOTO EN MAIN.DART EN EL LUGAR EN DONDE LLAMEMOS A LA IMAGEN
+
+  #SE PUEDEN LLAMAR LAS FOTOS UNA POR UNA PERO ES POCO PRÁCTICO
+  #   - assets/images/nombrefoto.jpg
+
+
+

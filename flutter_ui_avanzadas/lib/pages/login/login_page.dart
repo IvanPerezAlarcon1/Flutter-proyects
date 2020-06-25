@@ -1,3 +1,4 @@
+import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_ui_avanzadas/pages/login/widgets/welcome.dart';
@@ -9,12 +10,22 @@ class LoginPage extends StatefulWidget {
   _LoginPageState createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage> with AfterLayoutMixin{//AfterLayoutMixin se ejecuta cuando se renderiza la app
 
   @override
   void initState() {//esto se ejecuta una vez, cuando el widget es creado, si lo pusieramos en el metodo build se ejecutaria muchas veces
     super.initState();
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);//cambia la estatus bar a un color oscuro (donde se ve la bateria y hora)
+  }
+
+  @override
+  void afterFirstLayout(BuildContext context){//este método se ejecuta solo 1 vez, detecta el tipo de dispositivo en el cual se ejecuta la app
+    //para ver las medidas si está horizontal o vertical, shortestSide retorna el valor mínimo del ancho o el alto, independiente del sentido del dispositivo
+    final bool isTablet = MediaQuery.of(context).size.shortestSide >=600; //si esto se cumple es que la app está en una tablet y se permitira que el dispositivo rote, en caso contrario, se bloquea la opción de rotar la app
+    if(!isTablet){
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]); //SI ME ENCUENTRO EN UN SMARTPHONE SE BLOQUEA LA ROTACIÓN DEL DISPOSITIVO
+    }
+
   }
 
   @override

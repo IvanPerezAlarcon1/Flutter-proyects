@@ -1,3 +1,4 @@
+import 'package:consumming_rest_api/models/api_responses.dart';
 import 'package:consumming_rest_api/services/notes_services.dart';
 import 'package:consumming_rest_api/views/note_modify.dart';
 import 'package:consumming_rest_api/views/note_delete.dart';
@@ -12,75 +13,111 @@ class NoteList extends StatefulWidget {
 
 class _NoteListState extends State<NoteList> {
   NotesService get service => GetIt.I<NotesService>();
-  List<NoteForListing> notes = [];
+
+  //propiedad que representa la respuesta de la API
+  APIResponse<List<NoteForListing>> _apiResponse;
+  //variable que indica que hay un proceso de carga
+  bool _isLoading = false;
+
+  String formatDateTime(DateTime dateTime) {
+    return '${dateTime.day}/${dateTime.month}/${dateTime.year}'; //VER COMO PONER HORA Y MINUTOS
+  }
 
   @override
   void initState() {
-    notes = service.getNotesList();
+    _fetchNotes(); //método buscar notas
     super.initState();
+  }
+
+  _fetchNotes() async {
+    //muestra el load indicator
+    setState(() {
+      _isLoading = true;
+    });
+    _apiResponse = await service.getNotesList();
+
+    setState(() {
+      //esconde el load indicator
+      _isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("List of notes")),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          //Al presionar el botón "+" aparece en la pantalla, nos dirigimos a la ventana de crear nota
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => NoteModify()));
-        },
-        child: Icon(Icons.add),
-      ),
-      body: ListView.separated(
-        //lista en la pantalla
-        separatorBuilder: (_, __) => Divider(
-            height: 1, color: Colors.green), //separador de cada elemento
-        itemBuilder: (_, index) {
-          return Dismissible(
-            //key, es un parámetro requerido por el widget Dismissible
-            key: ValueKey(notes[index].noteID),
-            direction: DismissDirection.startToEnd,
+        appBar: AppBar(title: Text("Listado de notas")),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            //Al presionar el botón "+" aparece en la pantalla, nos dirigimos a la ventana de crear nota
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => NoteModify()));
+          },
+          child: Icon(Icons.add),
+        ),
+        body: Builder(builder: (_) {
+          if (_isLoading) {
+            //si esta cargando se mostrara el texto de carga
+            return Center(child: CircularProgressIndicator());
+          }
 
-            onDismissed: (direction) {},
+          if (_apiResponse.error) {
+            //si hay un error se mustra el mensaje
+            return Center(child: Text(_apiResponse.errorMessage));
+          }
 
-            confirmDismiss: (direction) async {
-              final result = await showDialog(
-                  context: context, builder: (_) => NoteDelete());
-              print(result);
-              return result;
-            },
-            background: Container(
-              color: Colors.red,
-              padding: EdgeInsets.only(left: 16),
-              child: Align(
-                child: Icon(
-                  Icons.delete,
-                  color: Colors.white,
+          return ListView.separated(
+            //_isLoading ? CircularProgressIndicator() : ListView.separated( //muestra un indicador circular de progreso mientras se cargan las notas
+
+            //lista en la pantalla
+            separatorBuilder: (_, __) => Divider(
+                height: 1, color: Colors.green), //separador de cada elemento
+            itemBuilder: (_, index) {
+              return Dismissible(
+                //key, es un parámetro requerido por el widget Dismissible
+                key: ValueKey(_apiResponse.data[index].noteID),
+                direction: DismissDirection.startToEnd,
+
+                onDismissed: (direction) {},
+
+                confirmDismiss: (direction) async {
+                  final result = await showDialog(
+                      context: context, builder: (_) => NoteDelete());
+                  print(result);
+                  return result;
+                },
+                background: Container(
+                  color: Colors.red,
+                  padding: EdgeInsets.only(left: 16),
+                  child: Align(
+                    child: Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                    ),
+                    alignment: Alignment.centerLeft,
+                  ),
                 ),
-                alignment: Alignment.centerLeft,
-              ),
-            ),
-            child: ListTile(
-              title: Text(
-                //texto principal de cada casilla
-                notes[index]
-                    .noteTitle, //titulo de la nota según la estructura de la clase NoteForListing
-                style: TextStyle(color: Theme.of(context).primaryColor),
-              ),
-              subtitle: Text(
-                  'Última modificación: ${notes[index].latestEditDateTime.day}/${notes[index].latestEditDateTime.month}/${notes[index].latestEditDateTime.year}'), //texto secundario de cada casilla
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => NoteModify(noteID: notes[index].noteID)));
-              },
-            ),
+                child: ListTile(
+                  title: Text(
+                    //texto principal de cada casilla
+                    _apiResponse.data[index]
+                        .noteTitle, //titulo de la nota según la estructura de la clase NoteForListing
+                    style: TextStyle(color: Theme.of(context).primaryColor),
+                  ),
+                  subtitle: Text(
+                      'Última modificación: ${formatDateTime(_apiResponse.data[index].createDateTime)}'), //fecha con el formato indicado en formatDateTime
+                  //'Última modificación: ${_apiResponse.data[index].latestEditDateTime.day}/${_apiResponse.data[index].latestEditDateTime.month}/${_apiResponse.data[index].latestEditDateTime.year}'), //texto secundario de cada casilla
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => NoteModify(
+                            noteID: _apiResponse.data[index].noteID)));
+                  },
+                ),
+              );
+            },
+            //itemCount: 30,
+            itemCount: _apiResponse.data
+                .length, //contador de elementos de la lista, en este caso se repite las veces indicada el titulo y el subtitulo
           );
-        },
-        //itemCount: 30,
-        itemCount: notes
-            .length, //contador de elementos de la lista, en este caso se repite las veces indicada el titulo y el subtitulo
-      ),
-    );
+        }));
   }
 }

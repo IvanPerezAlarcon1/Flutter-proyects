@@ -1,4 +1,5 @@
 import 'package:consumming_rest_api/models/api_responses.dart';
+import 'package:consumming_rest_api/models/note.dart';
 import 'package:consumming_rest_api/models/note_for_listing.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -18,16 +19,8 @@ class NotesService {
         final notes =
             <NoteForListing>[]; //ponemos todos los elementos en una lista
         for (var item in jsonData) {
-          final note = NoteForListing(
-            noteID: item['noteID'],
-            noteTitle: item['noteTitle'],
-            createDateTime: DateTime.parse(item['createDateTime']),
-            //si el resultados no es null, entonces transforma la fecha al formato deseado, de lo contrario guarda null
-            latestEditDateTime: item['latestEditDateTime'] != null
-                ? DateTime.parse(item['latestEditDateTime'])
-                : null,
-          );
-          notes.add(note); //agrega las notas a la lista notas mediante un for
+          notes.add(NoteForListing.fromJson(
+              item)); //agrega las notas a la lista notas mediante un for
         }
         //retorna la respuesta a la api
         return APIResponse<List<NoteForListing>>(data: notes);
@@ -38,6 +31,25 @@ class NotesService {
     })
         //para posibles errores luego de enviar los parametros a la API
         .catchError((_) => APIResponse<List<NoteForListing>>(
+            error: true, errorMessage: 'Un error ha ocurrido'));
+  }
+
+  Future<APIResponse<Note>> getNote(String noteID) {
+    return http.get(API + "/notes/" + noteID, headers: headers).then((data) {
+      //se hace el request
+      if (data.statusCode == 200) {
+        //aqui aparece la respuesta
+        //respuesta satisfactoria de los datos
+        final jsonData =
+            json.decode(data.body); //convierte el header en una lista de maps
+        return APIResponse<Note>(data: Note.fromJson(jsonData));
+      }
+      //retorna un mensaje de error en caso de ocurrir uno
+      return APIResponse<Note>(
+          error: true, errorMessage: 'Un error ha ocurrido');
+    })
+        //para posibles errores luego de enviar los parametros a la API
+        .catchError((_) => APIResponse<Note>(
             error: true, errorMessage: 'Un error ha ocurrido'));
   }
 }

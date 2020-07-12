@@ -56,7 +56,7 @@ class _NoteListState extends State<NoteList> {
         ),
         body: Builder(builder: (_) {
           if (_isLoading) {
-            //si esta cargando se mostrara el texto de carga
+            //si esta cargando se mostrara el texto de carga centrado
             return Center(child: CircularProgressIndicator());
           }
 

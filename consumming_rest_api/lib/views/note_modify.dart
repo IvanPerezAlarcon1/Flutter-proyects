@@ -1,4 +1,5 @@
 import 'package:consumming_rest_api/models/note.dart';
+import 'package:consumming_rest_api/models/note_insert.dart';
 import 'package:consumming_rest_api/services/notes_services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter/material.dart';
@@ -25,22 +26,26 @@ class _NoteModifyState extends State<NoteModify> {
 
   @override
   void initState() {
-    setState(() {
-      _isLoading = true;
-    });
-    notesService.getNote(widget.noteID).then((response) {
-      setState(() {
-        _isLoading = false;
-      });
-      if (response.error) {
-        errorMessage = response.errorMessage ??
-            'Un error ha ocurrido, mensaje de note_modify.dart';
-      }
-      note = response.data;
-      _titleController.text = note.noteTitle;
-      _contentController.text = note.noteContent;
-    });
     super.initState();
+
+    if (isEditing) {
+      //jace que al presionar el botón agregar, no muestre un error
+      setState(() {
+        _isLoading = true;
+      });
+      notesService.getNote(widget.noteID).then((response) {
+        setState(() {
+          _isLoading = false;
+        });
+        if (response.error) {
+          errorMessage = response.errorMessage ??
+              'Un error ha ocurrido, mensaje de note_modify.dart';
+        }
+        note = response.data;
+        _titleController.text = note.noteTitle;
+        _contentController.text = note.noteContent;
+      });
+    }
   }
 
   @override
@@ -87,13 +92,46 @@ class _NoteModifyState extends State<NoteModify> {
                         style: TextStyle(color: Colors.white),
                       ),
                       color: Theme.of(context).primaryColor,
-                      onPressed: () {
+                      onPressed: () async {
                         if (isEditing) {
                           //actualiza la nota en la API
                         } else {
+                          setState(() {
+                            _isLoading = true;
+                          });
                           //Crea la nota en la API
+                          final note = NoteInsert(
+                            noteTitle: _titleController.text,
+                            noteContent: _contentController.text,
+                          );
+                          final result = await notesService.createNote(note);
+                          setState(() {
+                            _isLoading = false;
+                          });
+                          final title = 'Hecho';
+                          final text = result.error
+                              ? (result.errorMessage ?? 'Ha ocurrido un error')
+                              : 'La nota ha sido creada';
+
+                          showDialog(
+                              context: context,
+                              builder: (_) => AlertDialog(
+                                    title: Text(title),
+                                    content: Text(text),
+                                    actions: <Widget>[
+                                      FlatButton(
+                                        child: Text('Ok'),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      )
+                                    ],
+                                  )).then((data) {
+                            if (result.data) {
+                              Navigator.of(context).pop();
+                            }
+                          });
                         }
-                        Navigator.of(context).pop();
                       },
                     ),
                   ),

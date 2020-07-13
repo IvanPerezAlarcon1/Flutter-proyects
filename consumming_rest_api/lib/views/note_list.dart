@@ -50,7 +50,10 @@ class _NoteListState extends State<NoteList> {
           onPressed: () {
             //Al presionar el botón "+" aparece en la pantalla, nos dirigimos a la ventana de crear nota
             Navigator.of(context)
-                .push(MaterialPageRoute(builder: (_) => NoteModify()));
+                .push(MaterialPageRoute(builder: (_) => NoteModify()))
+                .then((_) {
+              _fetchNotes(); //al agregar una nota, el listado de la pantalla principal se actualiza automaticamente.
+            });
           },
           child: Icon(Icons.add),
         ),

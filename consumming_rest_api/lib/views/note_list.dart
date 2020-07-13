@@ -85,6 +85,33 @@ class _NoteListState extends State<NoteList> {
                 confirmDismiss: (direction) async {
                   final result = await showDialog(
                       context: context, builder: (_) => NoteDelete());
+                  var message;
+                  if (result) {
+                    final deleteResult = await service
+                        .deleteNote(_apiResponse.data[index].noteID);
+                    if (deleteResult != null && deleteResult.data == true) {
+                      message = 'La nota fue eliminada satisfactoriamente';
+                    } else {
+                      message = deleteResult?.errorMessage ??
+                          'Ha ocurrido un error. archivo = note_list.dart';
+                    }
+                    showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                              title: Text('Hecho'),
+                              content: Text(message),
+                              actions: <Widget>[
+                                FlatButton(
+                                  child: Text('Ok'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                )
+                              ],
+                            ));
+                    return deleteResult?.data ?? false;
+                  }
+
                   print(result);
                   return result;
                 },

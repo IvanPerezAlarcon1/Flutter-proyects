@@ -98,4 +98,22 @@ class NotesService {
             errorMessage:
                 'Un error ha ocurrido, archivo: notes_services.dart'));
   }
+
+  Future<APIResponse<bool>> deleteNote(String noteID) {
+    return http.delete(API + "/notes/" + noteID, headers: headers).then((data) {
+      //se hace el request
+      if (data.statusCode == 204) {
+        return APIResponse<bool>(data: true);
+      }
+      //retorna un mensaje de error en caso de ocurrir uno
+      return APIResponse<bool>(
+          error: true,
+          errorMessage: 'Un error ha ocurrido, archivo: notes_services.dart');
+    })
+        //para posibles errores luego de enviar los parametros a la API
+        .catchError((_) => APIResponse<bool>(
+            error: true,
+            errorMessage:
+                'Un error ha ocurrido, archivo: notes_services.dart'));
+  }
 }

@@ -110,9 +110,13 @@ class _NoteListState extends State<NoteList> {
                       'Última modificación: ${formatDateTime(_apiResponse.data[index].createDateTime)}'), //fecha con el formato indicado en formatDateTime
                   //'Última modificación: ${_apiResponse.data[index].latestEditDateTime.day}/${_apiResponse.data[index].latestEditDateTime.month}/${_apiResponse.data[index].latestEditDateTime.year}'), //texto secundario de cada casilla
                   onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => NoteModify(
-                            noteID: _apiResponse.data[index].noteID)));
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(
+                            builder: (_) => NoteModify(
+                                noteID: _apiResponse.data[index].noteID)))
+                        .then((data) {
+                      _fetchNotes();
+                    });
                   },
                 ),
               );

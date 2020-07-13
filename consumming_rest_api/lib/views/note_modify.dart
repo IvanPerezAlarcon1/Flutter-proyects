@@ -95,23 +95,23 @@ class _NoteModifyState extends State<NoteModify> {
                       onPressed: () async {
                         if (isEditing) {
                           //actualiza la nota en la API
-                        } else {
                           setState(() {
                             _isLoading = true;
                           });
                           //Crea la nota en la API
-                          final note = NoteInsert(
+                          final note = NoteManipulation(
                             noteTitle: _titleController.text,
                             noteContent: _contentController.text,
                           );
-                          final result = await notesService.createNote(note);
+                          final result = await notesService.updateNote(
+                              widget.noteID, note);
                           setState(() {
                             _isLoading = false;
                           });
                           final title = 'Hecho';
                           final text = result.error
                               ? (result.errorMessage ?? 'Ha ocurrido un error')
-                              : 'La nota ha sido creada';
+                              : 'La nota ha sido actualizada';
 
                           showDialog(
                               context: context,

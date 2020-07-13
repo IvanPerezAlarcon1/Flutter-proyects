@@ -57,13 +57,34 @@ class NotesService {
             error: true, errorMessage: 'Un error ha ocurrido'));
   }
 
-  Future<APIResponse<bool>> createNote(NoteInsert item) {
+  Future<APIResponse<bool>> createNote(NoteManipulation item) {
     return http
         .post(API + "/notes",
             headers: headers, body: json.encode(item.toJson()))
         .then((data) {
       //se hace el request
       if (data.statusCode == 201) {
+        return APIResponse<bool>(data: true);
+      }
+      //retorna un mensaje de error en caso de ocurrir uno
+      return APIResponse<bool>(
+          error: true,
+          errorMessage: 'Un error ha ocurrido, archivo: notes_services.dart');
+    })
+        //para posibles errores luego de enviar los parametros a la API
+        .catchError((_) => APIResponse<bool>(
+            error: true,
+            errorMessage:
+                'Un error ha ocurrido, archivo: notes_services.dart'));
+  }
+
+  Future<APIResponse<bool>> updateNote(String noteID, NoteManipulation item) {
+    return http
+        .put(API + "/notes/" + noteID,
+            headers: headers, body: json.encode(item.toJson()))
+        .then((data) {
+      //se hace el request
+      if (data.statusCode == 204) {
         return APIResponse<bool>(data: true);
       }
       //retorna un mensaje de error en caso de ocurrir uno
